@@ -2,10 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import { loginUser } from "../services/auth.service";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 function Login() {
 
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   const [form, setForm] = useState({
     email: "",
@@ -24,22 +27,26 @@ function Login() {
     e.preventDefault();
 
     try {
-
       const res = await loginUser(form);
 
-      console.log(res);
+      console.log("Login Response:", res);
 
-      // Save token
-      localStorage.setItem("token", res.token);
+      // ✅ Correct data handling
+      login({
+        token: res.token,
+        user: res.user
+      });
 
-      // redirect dashboard
-      navigate("/dashboard");
+      // ✅ Correct role check
+      if (res.user.role === "admin") {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/dashboard");
+      }
 
     } catch (error) {
-
       console.error(error);
-      alert("Login failed");
-
+      alert(error.response?.data?.message || "Login failed");
     }
   };
 
