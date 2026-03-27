@@ -6,7 +6,7 @@ import crypto from "crypto"; // (kept if you need later)
 // ================= REGISTER =================
 export const register = async (req, res) => {
   try {
-    const { name, email, password , role } = req.body;
+    const { name, email, password, role } = req.body;
 
     // ✅ Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -36,7 +36,7 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role||"user"
+      role: role || "user"
     });
 
     res.status(201).json({
@@ -72,11 +72,13 @@ export const login = async (req, res) => {
     }
 
     res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role:use.role,
       token: generateToken(user),
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
     });
 
   } catch (error) {

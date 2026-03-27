@@ -29,3 +29,17 @@ export const getUserTrips = async (req, res) => {
     res.status(500).json({ message: "Error fetching trips" });
   }
 };
+
+export const getTripById = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    res.json(trip);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching trip" });
+  }
+};

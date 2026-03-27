@@ -1,130 +1,3 @@
-// // src/controllers/ai.controller.js
-// import Trip from "../models/Trip.model.js";
-// import { generateAIItinerary } from "../services/ai.service.js";
-// import { getWeatherForecast } from "../services/weather.service.js";
-// import { getPlaceDetails } from "../services/maps.service.js";
-// import { getNearbyPlaces } from "../services/nearby.service.js";
-
-
-
-// export const generateTripItinerary = async (req, res) => {
-//   try {
-//     const { tripId } = req.params;
-
-//     const trip = await Trip.findById(tripId);
-
-//     if (!trip) {
-//       return res.status(404).json({ message: "Trip not found" });
-//     }
-
-//     if (trip.user.toString() !== req.user.id) {
-//       return res.status(403).json({ message: "Unauthorized access" });
-//     }
-
-//     // 🔥 WEATHER (Optional)
-//     let weatherData = [];
-//     try {
-//       weatherData = await getWeatherForecast(trip.destination);
-//     } catch (err) {
-//       console.log("Weather failed, continuing...");
-//     }
-
-//     const tripWithWeather = {
-//       ...trip.toObject(),
-//       weather: weatherData,
-//     };
-
-//     // 🔥 AI GENERATION (Core)
-//     const aiResponse = await generateAIItinerary(tripWithWeather);
-
-//     const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-//     if (!jsonMatch) {
-//       throw new Error("Invalid JSON from AI");
-//     }
-
-//     const itineraryJSON = JSON.parse(jsonMatch[0]);
-
-//     // 🔥 MAP ENRICHMENT (Optional)
-//     try {
-//       if (itineraryJSON.itinerary && Array.isArray(itineraryJSON.itinerary)) {
-
-//         for (const day of itineraryJSON.itinerary) {
-
-//           if (day.recommended_places && Array.isArray(day.recommended_places)) {
-
-//             for (const place of day.recommended_places) {
-
-//               const details = await getPlaceDetails(
-//                 place.name,
-//                 trip.destination
-//               );
-
-//               if (details) {
-//                 place.location = details;
-//               }
-//             }
-//           }
-//         }
-//       }
-//     } catch (err) {
-//       console.log("Map enrichment failed. Continuing without coordinates.");
-//     }
-
-
-//     // 🔥 NEARBY PLACES (Optional)
-//     try {
-//       if (itineraryJSON.itinerary && Array.isArray(itineraryJSON.itinerary)) {
-
-//         for (const day of itineraryJSON.itinerary) {
-
-//           if (day.recommended_places && day.recommended_places.length > 0) {
-
-//             const firstPlace = day.recommended_places[0];
-
-//             if (firstPlace.location) {
-
-//               const { lat, lng } = firstPlace.location;
-
-//               const nearbyRestaurants = await getNearbyPlaces(lat, lng, "restaurant");
-//               const nearbyHotels = await getNearbyPlaces(lat, lng, "hotel");
-
-//               day.nearby = {
-//                 restaurants: nearbyRestaurants,
-//                 hotels: nearbyHotels,
-//               };
-//             }
-//           }
-//         }
-//       }
-//     } catch (err) {
-//       console.log("Nearby enrichment failed. Continuing...");
-//     }
-
-//     // 🔥 SAVE ALWAYS
-//     trip.itinerary = itineraryJSON;
-//     await trip.save();
-
-//     res.status(200).json({
-//       message: "Itinerary generated successfully",
-//       weather: weatherData,
-//       itinerary: itineraryJSON,
-//     });
-
-//   } catch (error) {
-//     console.error("AI Controller Error:", error.message);
-
-//     res.status(500).json({
-//       message: "AI generation failed",
-//       error: error.message,
-//     });
-//   }
-// };
-
-
-
-
-
-// src/controllers/ai.controller.js
 import Trip from "../models/Trip.model.js";
 import { generateAIItinerary } from "../services/ai.service.js";
 import { getWeatherForecast } from "../services/weather.service.js";
@@ -145,12 +18,12 @@ export const generateTripItinerary = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized access" });
     }
 
-    // 🌦 WEATHER (Optional)
+    // ================= WEATHER =================
     let weatherData = [];
     try {
       weatherData = await getWeatherForecast(trip.destination);
     } catch (err) {
-      console.log("Weather failed, continuing...");
+      console.log("Weather failed");
     }
 
     const tripWithWeather = {
@@ -158,71 +31,149 @@ export const generateTripItinerary = async (req, res) => {
       weather: weatherData,
     };
 
-    // 🤖 AI GENERATION
+    // ================= AI =================
     const aiResponse = await generateAIItinerary(tripWithWeather);
 
-    const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Invalid JSON from AI");
+
+    let itineraryJSON;
+
+    try {
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+
+      if (!jsonMatch) {
+        throw new Error("No JSON found in AI response");
+      }
+      console.log("AI FULL RESPONSE:", itineraryJSON);
+
+      itineraryJSON = JSON.parse(jsonMatch[0]);
+
+    } catch (err) {
+      console.log("❌ AI JSON PARSE FAILED");
+      console.log("RAW AI RESPONSE:", aiResponse);
+
+      return res.status(500).json({
+        message: "AI returned invalid format. Try again.",
+      });
     }
 
-    const itineraryJSON = JSON.parse(jsonMatch[0]);
 
-    // 🔥 Detect correct itinerary array
-    const itineraryArray =
-      itineraryJSON.itinerary ||
-      itineraryJSON.travel_itinerary ||
-      [];
+    // ================= 🔥 FIXED ARRAY DETECTION =================
+    // const itineraryArray =
+    //   itineraryJSON?.itinerary ||
+    //   itineraryJSON?.day_wise_itinerary ||
+    //   itineraryJSON?.trip?.itinerary ||
+    //   [];
 
-    // 🗺 MAP ENRICHMENT + NEARBY (Optional)
-    try {
-      if (Array.isArray(itineraryArray)) {
+    let itineraryArray = [];
 
-        for (const day of itineraryArray) {
+    if (Array.isArray(itineraryJSON.itinerary)) {
+      itineraryArray = itineraryJSON.itinerary;
 
-          // Collect recommended places from morning/afternoon/evening
-          const allPlaces = [];
+    } else if (Array.isArray(itineraryJSON.day_wise_itinerary)) {
+      itineraryArray = itineraryJSON.day_wise_itinerary;
 
-          if (day.morning?.recommended_places)
-            allPlaces.push(...day.morning.recommended_places);
+    } else if (Array.isArray(itineraryJSON.days)) {
+      itineraryArray = itineraryJSON.days;
 
-          if (day.afternoon?.recommended_places)
-            allPlaces.push(...day.afternoon.recommended_places);
+    } else if (itineraryJSON.trip?.itinerary) {
+      itineraryArray = itineraryJSON.trip.itinerary;
 
-          if (day.evening?.recommended_places)
-            allPlaces.push(...day.evening.recommended_places);
+    } else {
+      console.log("❌ UNKNOWN AI FORMAT:", itineraryJSON);
+    }
 
-          for (const place of allPlaces) {
 
-            // 📍 Add Coordinates
-            const details = await getPlaceDetails(
-              place.name,
-              trip.destination
-            );
+    console.log("✅ FINAL ARRAY LENGTH:", itineraryArray.length);
 
-            if (details) {
-              place.location = details;
+    // ================= MAP + NEARBY =================
+    for (const day of itineraryArray) {
 
-              // 🍽 Add Nearby Only If Location Exists
-              const nearbyRestaurants = await getNearbyPlaces(details.lat, details.lng, "restaurant");
-              const nearbyHotels = await getNearbyPlaces(details.lat, details.lng, "hotel");
+      let allPlaces = [];
 
-              place.nearby = {
-                restaurants: nearbyRestaurants,
-                hotels: nearbyHotels,
-              };
-            }
-          }
+      // ✅ recommended_places (MOST IMPORTANT)
+      if (Array.isArray(day.recommended_places)) {
+        allPlaces.push(...day.recommended_places);
+      }
+
+      // ✅ fallback for other formats
+      if (Array.isArray(day.morning)) {
+        day.morning.forEach(item => {
+          if (item.places) allPlaces.push(...item.places);
+        });
+      }
+
+      if (Array.isArray(day.afternoon)) {
+        day.afternoon.forEach(item => {
+          if (item.places) allPlaces.push(...item.places);
+        });
+      }
+
+      if (Array.isArray(day.evening)) {
+        day.evening.forEach(item => {
+          if (item.places) allPlaces.push(...item.places);
+        });
+      }
+
+      console.log("🔥 Extracted Places:", allPlaces);
+
+      for (const place of allPlaces) {
+
+        console.log("➡ Processing:", place.name);
+
+        const details = await getPlaceDetails(
+          place.name,
+          trip.destination
+        );
+
+        if (details) {
+          console.log("📍 Found Location:", details);
+
+          place.location = details;
+
+          const nearbyRestaurants = await getNearbyPlaces(
+            details.lat,
+            details.lng,
+            "restaurant"
+          );
+
+          const nearbyHotels = await getNearbyPlaces(
+            details.lat,
+            details.lng,
+            "hotel"
+          );
+
+          place.nearby = {
+            restaurants: nearbyRestaurants,
+            hotels: nearbyHotels,
+          };
+
+        } else {
+          console.log("❌ Location not found:", place.name);
+
+          // ✅ fallback so UI doesn't break
+          place.location = {
+            lat: null,
+            lng: null,
+            address: "Not found",
+          };
+
+          place.nearby = {
+            restaurants: [],
+            hotels: [],
+          };
         }
       }
-    } catch (err) {
-      console.log("Map/Nearby enrichment failed.");
     }
 
-    // 💾 SAVE
-    trip.itinerary = itineraryJSON;
+    // ================= SAVE =================
+    trip.itinerary = {
+      ...itineraryJSON,
+      weather: weatherData,
+    };
+
     await trip.save();
 
+    // ================= RESPONSE =================
     res.status(200).json({
       message: "Itinerary generated successfully",
       weather: weatherData,

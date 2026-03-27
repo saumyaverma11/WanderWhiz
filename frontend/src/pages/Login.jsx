@@ -12,8 +12,7 @@ function Login() {
 
   const [form, setForm] = useState({
     email: "",
-    password: "",
-    role: "user"
+    password: ""
   });
 
   const handleChange = (e) => {
@@ -76,14 +75,7 @@ function Login() {
           required
         />
 
-        <select
-          name="role"
-          onChange={handleChange}
-          className="w-full border p-3 rounded-lg"
-        >
-          <option value="user">Traveler</option>
-          <option value="admin">Admin</option>
-        </select>
+        
 
         <button
           className="w-full bg-orange-500 text-white p-3 rounded-lg hover:bg-orange-600"
