@@ -6,7 +6,8 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import TripDetails from "./pages/TripDetails";
-
+import AdminRoute from "./utils/AdminRoute";
+import AdminDashboard from "./pages/AdminDashboard";
 // Layout
 import DashboardLayout from "./layouts/DashboardLayout";
 
@@ -35,7 +36,18 @@ function App() {
           {/* Nested Routes */}
           <Route path="" element={<Dashboard />} />
           <Route path="trip/:id" element={<TripDetails />} />
+
+
         </Route>
+
+        <Route
+          path="/admin-dashboard"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
 
         {/* ❌ Fallback */}
         <Route path="*" element={<Navigate to="/" />} />

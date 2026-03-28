@@ -50,10 +50,73 @@ Rules:
       temperature: 0.7,
     });
 
-    return response.choices[0]?.message?.content;
+    const content = response?.choices?.[0]?.message?.content;
+
+    console.log("AI RAW CONTENT:", content);
+
+    // ❌ If empty
+    if (!content) {
+      return {
+        itinerary: [
+          {
+            day: 1,
+            morning: "No data",
+            afternoon: "No data",
+            evening: "No data",
+          },
+        ],
+      };
+    }
+
+    const cleanContent = content
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    // ✅ Try parsing JSON
+    let parsed;
+
+    try {
+      // ✅ Extract JSON safely
+      const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+
+      if (!jsonMatch) {
+        throw new Error("No JSON found");
+      }
+
+      parsed = JSON.parse(jsonMatch[0]);
+
+    } catch (err) {
+      console.log("❌ JSON parse failed:", err.message);
+
+      // ✅ SAFE FALLBACK (NO CRASH)
+      parsed = {
+        itinerary: [
+          {
+            day: 1,
+            morning: cleanContent,
+            afternoon: cleanContent,
+            evening: cleanContent,
+          },
+        ],
+      };
+    }
+
+    // ✅ NORMALIZATION (KEEP THIS)
+ 
+    return parsed;
 
   } catch (error) {
     console.error("Groq API Error:", error.message);
-    throw new Error("AI generation failed.");
+    return {
+      itinerary: [
+        {
+          day: 1,
+          morning: "AI failed, try again",
+          afternoon: "AI failed, try again",
+          evening: "AI failed, try again",
+        },
+      ],
+    };
   }
 };

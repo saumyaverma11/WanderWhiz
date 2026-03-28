@@ -34,10 +34,58 @@ const tripSchema = new mongoose.Schema(
       default: [],
     },
 
-    itinerary: {
-      type: mongoose.Schema.Types.Mixed,
-      default: null,
-    },
+    itinerary: [
+      {
+        day: Number,
+        date: String,
+
+        morning: String,
+        afternoon: String,
+        evening: String,
+
+        places: [
+          {
+            name: String,
+            description: String,
+
+            location: {
+              lat: Number,
+              lng: Number,
+              address: String
+            },
+
+            nearby: {
+              restaurants: [
+                {
+                  name: String,
+                  lat: Number,
+                  lng: Number
+                }
+              ],
+              hotels: [
+                {
+                  name: String,
+                  lat: Number,
+                  lng: Number
+                }
+              ]
+            }
+          }
+        ],
+
+        weather: {
+          temperature: Number,
+          condition: String,
+          humidity: Number
+        }
+      }
+    ],
+
+    isDeleted: {
+      type: Boolean,
+      default: false
+    }
+
   },
   { timestamps: true }
 );

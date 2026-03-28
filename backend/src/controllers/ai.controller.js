@@ -4,6 +4,65 @@ import { getWeatherForecast } from "../services/weather.service.js";
 import { getPlaceDetails } from "../services/maps.service.js";
 import { getNearbyPlaces } from "../services/nearby.service.js";
 
+// ================= FORMAT FUNCTION =================
+const formatSection = (section) => {
+  if (!section) return "No data";
+
+  if (typeof section === "string") return section;
+
+  if (typeof section === "object") {
+    return (
+      section.activity ||
+      section.morning_plans ||
+      section.afternoon_plans ||
+      section.evening_plans ||
+      section.morning_activities ||
+      section.afternoon_activities ||
+      section.evening_activities ||
+      "No data"
+    );
+  }
+
+  return "No data";
+};
+
+// ================= NORMALIZE FUNCTION =================
+const normalizeItinerary = (data) => {
+  const days = data?.days || [];
+
+  return days.map((day, index) => ({
+    day: index + 1,
+    date: day?.date || "",
+
+    morning: formatSection(day?.morning),
+    afternoon: formatSection(day?.afternoon),
+    evening: formatSection(day?.evening),
+
+    places: [
+      ...(day?.morning?.recommended_places || []),
+      ...(day?.afternoon?.recommended_places || []),
+      ...(day?.evening?.recommended_places || [])
+    ].map((p) => ({
+      name: p.name,
+      description: p.description,
+
+      location: {
+        lat: p.location?.lat || null,
+        lng: p.location?.lng || null,
+        address: p.location?.address || ""
+      },
+
+      nearby: {
+        restaurants: p.nearby?.restaurants || [],
+        hotels: p.nearby?.hotels || []
+      }
+    })),
+
+    weather: day?.weather || null
+  }));
+};
+
+// ================= MAIN CONTROLLER =================
 export const generateTripItinerary = async (req, res) => {
   try {
     const { tripId } = req.params;
@@ -34,91 +93,41 @@ export const generateTripItinerary = async (req, res) => {
     // ================= AI =================
     const aiResponse = await generateAIItinerary(tripWithWeather);
 
+    console.log("AI FULL RESPONSE:", aiResponse);
 
-    let itineraryJSON;
-
-    try {
-      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-
-      if (!jsonMatch) {
-        throw new Error("No JSON found in AI response");
-      }
-      console.log("AI FULL RESPONSE:", itineraryJSON);
-
-      itineraryJSON = JSON.parse(jsonMatch[0]);
-
-    } catch (err) {
-      console.log("❌ AI JSON PARSE FAILED");
-      console.log("RAW AI RESPONSE:", aiResponse);
-
-      return res.status(500).json({
-        message: "AI returned invalid format. Try again.",
-      });
-    }
-
-
-    // ================= 🔥 FIXED ARRAY DETECTION =================
-    // const itineraryArray =
-    //   itineraryJSON?.itinerary ||
-    //   itineraryJSON?.day_wise_itinerary ||
-    //   itineraryJSON?.trip?.itinerary ||
-    //   [];
-
+    // ================= EXTRACT CORRECT DATA =================
     let itineraryArray = [];
 
-    if (Array.isArray(itineraryJSON.itinerary)) {
-      itineraryArray = itineraryJSON.itinerary;
+    if (Array.isArray(aiResponse.day_wise_itinerary)) {
+      itineraryArray = aiResponse.day_wise_itinerary;
 
-    } else if (Array.isArray(itineraryJSON.day_wise_itinerary)) {
-      itineraryArray = itineraryJSON.day_wise_itinerary;
+    } else if (Array.isArray(aiResponse.days)) {
+      itineraryArray = aiResponse.days;
 
-    } else if (Array.isArray(itineraryJSON.days)) {
-      itineraryArray = itineraryJSON.days;
+    } else if (Array.isArray(aiResponse.day)) {
+      itineraryArray = aiResponse.day;
 
-    } else if (itineraryJSON.trip?.itinerary) {
-      itineraryArray = itineraryJSON.trip.itinerary;
+    } else if (Array.isArray(aiResponse.itinerary)) {
+      itineraryArray = aiResponse.itinerary;
 
     } else {
-      console.log("❌ UNKNOWN AI FORMAT:", itineraryJSON);
+      console.log("❌ UNKNOWN AI FORMAT:", aiResponse);
     }
-
 
     console.log("✅ FINAL ARRAY LENGTH:", itineraryArray.length);
 
     // ================= MAP + NEARBY =================
     for (const day of itineraryArray) {
 
-      let allPlaces = [];
-
-      // ✅ recommended_places (MOST IMPORTANT)
-      if (Array.isArray(day.recommended_places)) {
-        allPlaces.push(...day.recommended_places);
-      }
-
-      // ✅ fallback for other formats
-      if (Array.isArray(day.morning)) {
-        day.morning.forEach(item => {
-          if (item.places) allPlaces.push(...item.places);
-        });
-      }
-
-      if (Array.isArray(day.afternoon)) {
-        day.afternoon.forEach(item => {
-          if (item.places) allPlaces.push(...item.places);
-        });
-      }
-
-      if (Array.isArray(day.evening)) {
-        day.evening.forEach(item => {
-          if (item.places) allPlaces.push(...item.places);
-        });
-      }
+      let allPlaces = [
+        ...(day?.morning?.recommended_places || []),
+        ...(day?.afternoon?.recommended_places || []),
+        ...(day?.evening?.recommended_places || [])
+      ];
 
       console.log("🔥 Extracted Places:", allPlaces);
 
       for (const place of allPlaces) {
-
-        console.log("➡ Processing:", place.name);
 
         const details = await getPlaceDetails(
           place.name,
@@ -126,8 +135,6 @@ export const generateTripItinerary = async (req, res) => {
         );
 
         if (details) {
-          console.log("📍 Found Location:", details);
-
           place.location = details;
 
           const nearbyRestaurants = await getNearbyPlaces(
@@ -148,9 +155,6 @@ export const generateTripItinerary = async (req, res) => {
           };
 
         } else {
-          console.log("❌ Location not found:", place.name);
-
-          // ✅ fallback so UI doesn't break
           place.location = {
             lat: null,
             lng: null,
@@ -165,11 +169,12 @@ export const generateTripItinerary = async (req, res) => {
       }
     }
 
-    // ================= SAVE =================
-    trip.itinerary = {
-      ...itineraryJSON,
-      weather: weatherData,
-    };
+    // ================= NORMALIZE + SAVE =================
+    const cleanItinerary = normalizeItinerary({
+      days: itineraryArray   // ✅ MOST IMPORTANT FIX
+    });
+
+    trip.itinerary = cleanItinerary;
 
     await trip.save();
 
@@ -177,7 +182,7 @@ export const generateTripItinerary = async (req, res) => {
     res.status(200).json({
       message: "Itinerary generated successfully",
       weather: weatherData,
-      itinerary: itineraryJSON,
+      itinerary: cleanItinerary,
     });
 
   } catch (error) {
