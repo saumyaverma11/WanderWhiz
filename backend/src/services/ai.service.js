@@ -20,7 +20,52 @@ Adapt activities based on weather conditions.
     const prompt = `
 You are an expert AI Travel Planner.
 
-Create a detailed day-wise travel itinerary in STRICT JSON format.
+Generate a COMPLETE travel itinerary in STRICT JSON format.
+
+IMPORTANT:
+- Return ONLY JSON
+- Do NOT add explanation text
+- Do NOT use markdown
+- JSON must be valid and parsable
+
+FORMAT:
+
+{
+  "days": [
+    {
+      "day": 1,
+      "date": "YYYY-MM-DD",
+      "morning": {
+        "activity": "string",
+        "recommended_places": [
+          {
+            "name": "string",
+            "description": "string"
+          }
+        ]
+      },
+      "afternoon": {
+        "activity": "string",
+        "recommended_places": [
+          {
+            "name": "string",
+            "description": "string"
+          }
+        ]
+      },
+      "evening": {
+        "activity": "string",
+        "recommended_places": [
+          {
+            "name": "string",
+            "description": "string"
+          }
+        ]
+      },
+      "estimated_budget_for_day": number
+    }
+  ]
+}
 
 Trip Details:
 Destination: ${tripData.destination}
@@ -30,18 +75,6 @@ End Date: ${tripData.endDate}
 Preferences: ${tripData.preferences?.join(", ")}
 
 ${weatherSection}
-
-Rules:
-1. Divide each day into: morning, afternoon, evening.
-2. Include:
-   - day
-   - date
-   - morning
-   - afternoon
-   - evening
-   - recommended_places (array of objects with name + description)
-   - estimated_budget_for_day
-3. Return ONLY valid JSON.
 `;
 
     const response = await groq.chat.completions.create({
@@ -103,7 +136,7 @@ Rules:
     }
 
     // ✅ NORMALIZATION (KEEP THIS)
- 
+
     return parsed;
 
   } catch (error) {

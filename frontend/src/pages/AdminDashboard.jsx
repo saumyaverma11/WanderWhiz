@@ -5,6 +5,7 @@ import {
   updateUserRole
 } from "../services/admin.service";
 
+
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
 
@@ -22,6 +23,7 @@ function AdminDashboard() {
   };
 
 
+
   const handleRoleChange = async (id, newRole) => {
     try {
       await updateUserRole(id, newRole);
@@ -36,6 +38,9 @@ function AdminDashboard() {
       console.error(error);
     }
   };
+
+
+
 
   const handleDelete = async (id) => {
     await deleteUser(id);

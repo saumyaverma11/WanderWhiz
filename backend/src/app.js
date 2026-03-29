@@ -15,7 +15,6 @@ app.use(cors());
 app.use(express.json());  // used for extracting request body
 
 app.use("/api/auth", authRoutes);
-app.use("/api/trips", tripRoutes);
 // app.use(errorMiddleware);
 app.use("/api/ai", aiRoutes);
 app.use("/api/weather", weatherRoutes);

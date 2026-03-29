@@ -11,8 +11,9 @@ import AdminDashboard from "./pages/AdminDashboard";
 // Layout
 import DashboardLayout from "./layouts/DashboardLayout";
 
+
 // Auth
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./utils/ProtectedRoute.jsx";
 
 function App() {
   return (

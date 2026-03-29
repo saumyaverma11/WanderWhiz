@@ -16,22 +16,23 @@ const TripForm = () => {
   const [aiData, setAiData] = useState(null);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const trip = await createTrip(form);
-      const aiRes = await generateAITrip(trip._id);
+    const trip = await createTrip(form);
 
-      setAiData(aiRes);
-    } catch (error) {
-      console.error(error);
-      alert(error.response?.data?.message || "Error generating trip");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // ✅ Redirect to Trip Details page
+    window.location.href = `/dashboard/trip/${trip._id}`;
+
+  } catch (error) {
+    console.error(error);
+    alert("Error creating trip");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
