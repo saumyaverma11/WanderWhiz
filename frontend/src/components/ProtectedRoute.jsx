@@ -1,11 +1,19 @@
+
+
 import { useContext } from "react";
-import { Navigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
-  const { auth } = useContext(AuthContext);
+  const { auth, loading } = useContext(AuthContext);
 
-  if (!auth?.token) {
+  // 🔥 WAIT FIRST
+  if (loading) {
+    return <div className="text-center mt-10">Loading...</div>;
+  }
+
+  // 🔥 CHECK BOTH
+  if (!auth?.token || !auth?.user) {
     return <Navigate to="/login" />;
   }
 

@@ -17,18 +17,16 @@ Adapt activities based on weather conditions.
 `
         : "";
 
-    const prompt = `
+
+
+
+        
+const prompt = `
 You are an expert AI Travel Planner.
 
-Generate a COMPLETE travel itinerary in STRICT JSON format.
+Return ONLY JSON. No explanation. No text. No markdown.
 
-IMPORTANT:
-- Return ONLY JSON
-- Do NOT add explanation text
-- Do NOT use markdown
-- JSON must be valid and parsable
-
-FORMAT:
+STRICT FORMAT:
 
 {
   "days": [
@@ -36,47 +34,44 @@ FORMAT:
       "day": 1,
       "date": "YYYY-MM-DD",
       "morning": {
-        "activity": "string",
+        "activity": "text",
         "recommended_places": [
-          {
-            "name": "string",
-            "description": "string"
-          }
+          { "name": "place", "description": "text" }
         ]
       },
       "afternoon": {
-        "activity": "string",
-        "recommended_places": [
-          {
-            "name": "string",
-            "description": "string"
-          }
-        ]
+        "activity": "text",
+        "recommended_places": []
       },
       "evening": {
-        "activity": "string",
-        "recommended_places": [
-          {
-            "name": "string",
-            "description": "string"
-          }
-        ]
+        "activity": "text",
+        "recommended_places": []
       },
       "estimated_budget_for_day": number
     }
   ]
 }
 
+IMPORTANT RULES:
+- Output must be valid JSON
+- No line breaks inside any string
+- Do NOT use \\n or new lines
+- Do NOT wrap JSON in quotes
+
+🔥 CONTENT RULES:
+- Each activity must be detailed (20-30 words)
+- Write in ONE LINE only
+- Use simple and clear English
+- Make it descriptive like a travel guide
+
 Trip Details:
 Destination: ${tripData.destination}
 Travel Type: ${tripData.travelType}
-Start Date: ${tripData.startDate}
-End Date: ${tripData.endDate}
+Dates: ${tripData.startDate} to ${tripData.endDate}
 Preferences: ${tripData.preferences?.join(", ")}
 
 ${weatherSection}
 `;
-
     const response = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
       messages: [{ role: "user", content: prompt }],
@@ -106,38 +101,52 @@ ${weatherSection}
       .replace(/```/g, "")
       .trim();
 
-    // ✅ Try parsing JSON
+    
+
     let parsed;
 
-    try {
-      // ✅ Extract JSON safely
-      const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+try {
+  const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
 
-      if (!jsonMatch) {
-        throw new Error("No JSON found");
-      }
+  if (!jsonMatch) throw new Error("No JSON");
 
-      parsed = JSON.parse(jsonMatch[0]);
+  parsed = JSON.parse(jsonMatch[0]);
 
-    } catch (err) {
-      console.log("❌ JSON parse failed:", err.message);
+  // 🔥 CASE 1: AI wrapped JSON as string
+  if (typeof parsed === "string") {
+    parsed = JSON.parse(parsed);
+  }
 
-      // ✅ SAFE FALLBACK (NO CRASH)
-      parsed = {
-        itinerary: [
-          {
-            day: 1,
-            morning: cleanContent,
-            afternoon: cleanContent,
-            evening: cleanContent,
-          },
-        ],
-      };
+  // 🔥 CASE 2: Wrong nesting inside morning
+  if (parsed.days && parsed.days.length > 0) {
+    const first = parsed.days[0];
+
+    if (
+      typeof first.morning === "string" &&
+      first.morning.includes('"days"')
+    ) {
+      console.log("🔥 FIXING NESTED JSON");
+
+      parsed = JSON.parse(first.morning);
     }
+  }
 
-    // ✅ NORMALIZATION (KEEP THIS)
+} catch (err) {
+  console.log("❌ AI parsing failed");
 
-    return parsed;
+  parsed = {
+    days: [
+      {
+        day: 1,
+        morning: { activity: cleanContent },
+        afternoon: { activity: cleanContent },
+        evening: { activity: cleanContent },
+      },
+    ],
+  };
+}
+return parsed;
+
 
   } catch (error) {
     console.error("Groq API Error:", error.message);

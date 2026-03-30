@@ -1,68 +1,287 @@
+// import Trip from "../models/Trip.model.js";
+// import { generateAIItinerary } from "../services/ai.service.js";
+// import { getWeatherForecast } from "../services/weather.service.js";
+// import { getPlaceDetails } from "../services/maps.service.js";
+// import { getNearbyPlaces } from "../services/nearby.service.js";
+
+// const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+// const formatSection = (section) => {
+//   if (!section) return { activity: "No data", places: [] };
+
+//   // ✅ If already object
+//   if (typeof section === "object") {
+//     return {
+//       activity: section.activity || "No data",
+//       places: section.recommended_places || []
+//     };
+//   }
+
+//   // ✅ If string
+//   if (typeof section === "string") {
+//     return {
+//       activity: section,
+//       places: []
+//     };
+//   }
+
+//   return { activity: "No data", places: [] };
+// };
+
+// // ================= NORMALIZE FUNCTION =================
+// const normalizeItinerary = (data) => {
+//   const days = data?.days || [];
+
+//   return days.map((day, index) => ({
+//     day: index + 1,
+//     date: day?.date || "",
+
+//     morning: formatSection(day?.morning),
+//     afternoon: formatSection(day?.afternoon),
+//     evening: formatSection(day?.evening),
+
+//     places: [
+//       ...(day?.morning?.recommended_places || []),
+//       ...(day?.afternoon?.recommended_places || []),
+//       ...(day?.evening?.recommended_places || [])
+//     ].map((p) => ({
+//       name: p.name,
+//       description: p.description,
+
+//       location: {
+//         lat: p.location?.lat || null,
+//         lng: p.location?.lng || null,
+//         address: p.location?.address || ""
+//       },
+
+//       nearby: {
+//         restaurants: p.nearby?.restaurants || [],
+//         hotels: p.nearby?.hotels || []
+//       }
+//     })),
+
+//     weather: day?.weather || null
+//   }));
+// };
+
+// // ================= MAIN CONTROLLER =================
+// export const generateTripItinerary = async (req, res) => {
+//   try {
+//     const { tripId } = req.params;
+
+//     const trip = await Trip.findById(tripId);
+
+//     if (!trip) {
+//       return res.status(404).json({ message: "Trip not found" });
+//     }
+
+//     if (trip.user.toString() !== req.user.id) {
+//       return res.status(403).json({ message: "Unauthorized access" });
+//     }
+
+//     // ================= WEATHER =================
+//     let weatherData = [];
+//     try {
+//       weatherData = await getWeatherForecast(trip.destination);
+//     } catch (err) {
+//       console.log("Weather failed");
+//     }
+
+//     const tripWithWeather = {
+//       ...trip.toObject(),
+//       weather: weatherData,
+//     };
+
+//     // ================= AI =================
+//     const aiResponse = await generateAIItinerary(tripWithWeather);
+
+//     console.log("AI FULL RESPONSE:", aiResponse);
+//     console.log("🔥 FINAL AI RESPONSE:", JSON.stringify(aiResponse, null, 2));
+//     // ================= EXTRACT CORRECT DATA =================
+//     let itineraryArray = [];
+
+//     if (Array.isArray(aiResponse.day_wise_itinerary)) {
+//       itineraryArray = aiResponse.day_wise_itinerary;
+
+//     } else if (Array.isArray(aiResponse.days)) {
+//       itineraryArray = aiResponse.days;
+
+//     } else if (Array.isArray(aiResponse.day)) {
+//       itineraryArray = aiResponse.day;
+
+//     } else if (Array.isArray(aiResponse.itinerary)) {
+//       itineraryArray = aiResponse.itinerary;
+
+//     } else {
+//       console.log("❌ UNKNOWN AI FORMAT:", aiResponse);
+//     }
+
+//     console.log("✅ FINAL ARRAY LENGTH:", itineraryArray.length);
+
+//     // ================= MAP + NEARBY =================
+//     for (const day of itineraryArray) {
+
+//       // let allPlaces = [
+//       //   ...(day?.morning?.recommended_places || []),
+//       //   ...(day?.afternoon?.recommended_places || []),
+//       //   ...(day?.evening?.recommended_places || [])
+//       // ];
+
+
+//       const MAX_PLACES = 3;
+
+//       let allPlaces = [
+//         ...(day?.morning?.recommended_places || []),
+//         ...(day?.afternoon?.recommended_places || []),
+//         ...(day?.evening?.recommended_places || [])
+//       ].slice(0, MAX_PLACES); // 🔥 LIMIT
+
+
+//       console.log("🔥 Extracted Places:", allPlaces);
+
+
+//       await Promise.all(
+//         allPlaces.map(async (place) => {
+//           try {
+//             const details = await getPlaceDetails(place.name, trip.destination);
+
+//             if (details) {
+//               place.location = details;
+
+//               // 🔥 ONLY ONE API CALL (IMPORTANT)
+//               const nearbyRestaurants = await getNearbyPlaces(
+//                 details.lat,
+//                 details.lng,
+//                 "restaurant"
+//               );
+
+//               place.nearby = {
+//                 restaurants: nearbyRestaurants,
+//                 hotels: [] // ❌ skip hotels
+//               };
+
+//             } else {
+//               place.location = { lat: null, lng: null };
+//               place.nearby = { restaurants: [], hotels: [] };
+//             }
+
+//             // 🔥 DELAY (RATE LIMIT FIX)
+//             await delay(300);
+
+//           } catch (err) {
+//             console.log("⚠️ Skipping place:", place.name);
+//           }
+//         })
+//       );
+
+
+
+//     }
+
+//     // ================= NORMALIZE + SAVE =================
+//     const cleanItinerary = normalizeItinerary({
+//       days: itineraryArray   // ✅ MOST IMPORTANT FIX
+//     });
+
+//     trip.itinerary = cleanItinerary;
+
+//     await trip.save();
+
+//     // ================= RESPONSE =================
+//     res.status(200).json({
+//       message: "Itinerary generated successfully",
+//       weather: weatherData,
+//       itinerary: cleanItinerary,
+//     });
+
+//   } catch (error) {
+//     console.error("AI Controller Error:", error.message);
+
+//     res.status(500).json({
+//       message: "AI generation failed",
+//       error: error.message,
+//     });
+//   }
+// };
+
+
+
 import Trip from "../models/Trip.model.js";
 import { generateAIItinerary } from "../services/ai.service.js";
 import { getWeatherForecast } from "../services/weather.service.js";
 import { getPlaceDetails } from "../services/maps.service.js";
 import { getNearbyPlaces } from "../services/nearby.service.js";
 
-// ================= FORMAT FUNCTION =================
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
+/* ================= FORMAT FUNCTION (FIXED) ================= */
 const formatSection = (section) => {
-  if (!section) return "No data";
-
-  if (typeof section === "string") return section;
-
-  if (typeof section === "object") {
-    return (
-      section.activity ||
-      section.morning_plans ||
-      section.afternoon_plans ||
-      section.evening_plans ||
-      section.morning_activities ||
-      section.afternoon_activities ||
-      section.evening_activities ||
-      "No data"
-    );
+  if (!section) {
+    return { activity: "No data", places: [] };
   }
 
-  return "No data";
+  // ✅ If AI sends object
+  if (typeof section === "object") {
+    return {
+      activity: section.activity || "No data",
+      places: section.recommended_places || [],
+    };
+  }
+
+  // ✅ If AI sends string
+  if (typeof section === "string") {
+    return {
+      activity: section,
+      places: [],
+    };
+  }
+
+  return { activity: "No data", places: [] };
 };
 
-// ================= NORMALIZE FUNCTION =================
+/* ================= NORMALIZE FUNCTION (FIXED) ================= */
 const normalizeItinerary = (data) => {
   const days = data?.days || [];
 
-  return days.map((day, index) => ({
-    day: index + 1,
-    date: day?.date || "",
+  return days.map((day, index) => {
+    const morning = formatSection(day?.morning);
+    const afternoon = formatSection(day?.afternoon);
+    const evening = formatSection(day?.evening);
 
-    morning: formatSection(day?.morning),
-    afternoon: formatSection(day?.afternoon),
-    evening: formatSection(day?.evening),
+    return {
+      day: index + 1,
+      date: day?.date || "",
 
-    places: [
-      ...(day?.morning?.recommended_places || []),
-      ...(day?.afternoon?.recommended_places || []),
-      ...(day?.evening?.recommended_places || [])
-    ].map((p) => ({
-      name: p.name,
-      description: p.description,
+      // ✅ ALWAYS STRING NOW (NO BUG)
+      morning: morning.activity,
+      afternoon: afternoon.activity,
+      evening: evening.activity,
 
-      location: {
-        lat: p.location?.lat || null,
-        lng: p.location?.lng || null,
-        address: p.location?.address || ""
-      },
+      // ✅ COMBINED PLACES
+      places: [
+        ...morning.places,
+        ...afternoon.places,
+        ...evening.places,
+      ].map((p) => ({
+        name: p.name,
+        description: p.description,
+        location: {
+          lat: p.location?.lat || null,
+          lng: p.location?.lng || null,
+          address: p.location?.address || "",
+        },
+        nearby: {
+          restaurants: p.nearby?.restaurants || [],
+          hotels: p.nearby?.hotels || [],
+        },
+      })),
 
-      nearby: {
-        restaurants: p.nearby?.restaurants || [],
-        hotels: p.nearby?.hotels || []
-      }
-    })),
-
-    weather: day?.weather || null
-  }));
+      weather: day?.weather || null,
+    };
+  });
 };
 
-// ================= MAIN CONTROLLER =================
+/* ================= MAIN CONTROLLER ================= */
 export const generateTripItinerary = async (req, res) => {
   try {
     const { tripId } = req.params;
@@ -77,11 +296,11 @@ export const generateTripItinerary = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized access" });
     }
 
-    // ================= WEATHER =================
+    /* ================= WEATHER ================= */
     let weatherData = [];
     try {
       weatherData = await getWeatherForecast(trip.destination);
-    } catch (err) {
+    } catch {
       console.log("Weather failed");
     }
 
@@ -90,95 +309,77 @@ export const generateTripItinerary = async (req, res) => {
       weather: weatherData,
     };
 
-    // ================= AI =================
+    /* ================= AI ================= */
     const aiResponse = await generateAIItinerary(tripWithWeather);
 
-    console.log("AI FULL RESPONSE:", aiResponse);
+    console.log("🔥 FINAL AI RESPONSE:", JSON.stringify(aiResponse, null, 2));
 
-    // ================= EXTRACT CORRECT DATA =================
+    /* ================= EXTRACT ARRAY ================= */
     let itineraryArray = [];
 
-    if (Array.isArray(aiResponse.day_wise_itinerary)) {
-      itineraryArray = aiResponse.day_wise_itinerary;
-
-    } else if (Array.isArray(aiResponse.days)) {
+    if (Array.isArray(aiResponse?.days)) {
       itineraryArray = aiResponse.days;
-
-    } else if (Array.isArray(aiResponse.day)) {
-      itineraryArray = aiResponse.day;
-
-    } else if (Array.isArray(aiResponse.itinerary)) {
+    } else if (Array.isArray(aiResponse?.itinerary)) {
       itineraryArray = aiResponse.itinerary;
-
     } else {
-      console.log("❌ UNKNOWN AI FORMAT:", aiResponse);
+      console.log("❌ Unknown AI format");
     }
 
-    console.log("✅ FINAL ARRAY LENGTH:", itineraryArray.length);
-
-    // ================= MAP + NEARBY =================
+    /* ================= MAP + NEARBY ================= */
     for (const day of itineraryArray) {
+      const MAX_PLACES = 3;
 
       let allPlaces = [
         ...(day?.morning?.recommended_places || []),
         ...(day?.afternoon?.recommended_places || []),
-        ...(day?.evening?.recommended_places || [])
-      ];
+        ...(day?.evening?.recommended_places || []),
+      ].slice(0, MAX_PLACES);
 
-      console.log("🔥 Extracted Places:", allPlaces);
+      await Promise.all(
+        allPlaces.map(async (place) => {
+          try {
+            const details = await getPlaceDetails(
+              place.name,
+              trip.destination
+            );
 
-      for (const place of allPlaces) {
+            if (details) {
+              place.location = details;
 
-        const details = await getPlaceDetails(
-          place.name,
-          trip.destination
-        );
+              const nearbyRestaurants = await getNearbyPlaces(
+                details.lat,
+                details.lng,
+                "restaurant"
+              );
 
-        if (details) {
-          place.location = details;
+              place.nearby = {
+                restaurants: nearbyRestaurants,
+                hotels: [],
+              };
+            } else {
+              place.location = { lat: null, lng: null };
+              place.nearby = { restaurants: [], hotels: [] };
+            }
 
-          const nearbyRestaurants = await getNearbyPlaces(
-            details.lat,
-            details.lng,
-            "restaurant"
-          );
-
-          const nearbyHotels = await getNearbyPlaces(
-            details.lat,
-            details.lng,
-            "hotel"
-          );
-
-          place.nearby = {
-            restaurants: nearbyRestaurants,
-            hotels: nearbyHotels,
-          };
-
-        } else {
-          place.location = {
-            lat: null,
-            lng: null,
-            address: "Not found",
-          };
-
-          place.nearby = {
-            restaurants: [],
-            hotels: [],
-          };
-        }
-      }
+            await delay(300); // ✅ rate limit fix
+          } catch {
+            console.log("⚠️ Skipping place:", place.name);
+          }
+        })
+      );
     }
 
-    // ================= NORMALIZE + SAVE =================
+    /* ================= NORMALIZE ================= */
     const cleanItinerary = normalizeItinerary({
-      days: itineraryArray   // ✅ MOST IMPORTANT FIX
+      days: itineraryArray,
     });
 
+    /* ================= SAVE ================= */
     trip.itinerary = cleanItinerary;
-
     await trip.save();
+    console.log("Trip is ", trip);
 
-    // ================= RESPONSE =================
+    /* ================= RESPONSE ================= */
     res.status(200).json({
       message: "Itinerary generated successfully",
       weather: weatherData,

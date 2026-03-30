@@ -23,7 +23,7 @@ const Sidebar = () => {
           <FaHome /> Dashboard
         </Link>
 
-        <Link to="/trips" className={linkClass("/trips")}>
+        <Link to="/trips" className={linkClass("/dashboard")}>
           <FaMap /> My Trips
         </Link>
 

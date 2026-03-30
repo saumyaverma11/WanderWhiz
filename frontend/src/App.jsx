@@ -17,7 +17,7 @@ import ProtectedRoute from "./utils/ProtectedRoute.jsx";
 
 function App() {
   return (
-    <BrowserRouter>
+   
       <Routes>
 
         {/* 🌐 Public */}
@@ -54,7 +54,6 @@ function App() {
         <Route path="*" element={<Navigate to="/" />} />
 
       </Routes>
-    </BrowserRouter>
   );
 }
 

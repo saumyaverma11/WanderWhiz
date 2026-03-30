@@ -11,3 +11,9 @@ export const getTrips = async () => {
   const res = await API.get("/trip");
   return res.data;
 };
+
+
+export const deleteTrip = async (id) => {
+  const res = await API.delete(`/trip/${id}`);
+  return res.data;
+};

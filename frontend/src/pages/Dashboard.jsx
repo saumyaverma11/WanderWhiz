@@ -4,7 +4,7 @@ import TripList from "../components/dashboard/TripList";
 
 const Dashboard = () => {
   return (
-   <div>
+    <div>
 
       {/* Hero Section */}
       <div className="relative h-64 rounded-2xl overflow-hidden mb-6 shadow">
@@ -25,6 +25,8 @@ const Dashboard = () => {
 
       </div>
 
+      <h1 className="text-3xl font-bold mb-2">Welcome back!</h1>
+      <p className="text-gray-500 mb-6">Ready for your next adventure?</p>
       {/* Trip Form */}
       <div className="bg-white p-6 rounded-xl shadow mb-6">
         <TripForm />
@@ -34,8 +36,8 @@ const Dashboard = () => {
       <div className="bg-white p-6 rounded-xl shadow">
         <TripList />
       </div>
-  </div>
-  
+    </div>
+
   );
 };
 
