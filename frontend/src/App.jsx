@@ -10,50 +10,55 @@ import AdminRoute from "./utils/AdminRoute";
 import AdminDashboard from "./pages/AdminDashboard";
 // Layout
 import DashboardLayout from "./layouts/DashboardLayout";
-
+import MyTrips from "./pages/MyTrips";
 
 // Auth
 import ProtectedRoute from "./utils/ProtectedRoute.jsx";
 
 function App() {
   return (
-   
-      <Routes>
 
-        {/* 🌐 Public */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+    <Routes>
 
-        {/* 🔒 Dashboard Layout */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          {/* Nested Routes */}
-          <Route path="" element={<Dashboard />} />
-          <Route path="trip/:id" element={<TripDetails />} />
+      {/* 🌐 Public */}
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      {/* 🔒 Dashboard Layout */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        {/* Nested Routes */}
+        <Route path="" element={<Dashboard />} />
+        <Route path="trip/:id" element={<TripDetails />} />
+        {/* ✅ ADD THIS */}
+       <Route path="trips" element={<MyTrips />} />
+
+        {/* ✅ ADD THIS */}
+        <Route path="profile" element={<div>Profile Page Coming Soon</div>} />
 
 
-        </Route>
+      </Route>
 
-        <Route
-          path="/admin-dashboard"
-          element={
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          }
-        />
+      <Route
+        path="/admin-dashboard"
+        element={
+          <AdminRoute>
+            <AdminDashboard />
+          </AdminRoute>
+        }
+      />
 
-        {/* ❌ Fallback */}
-        <Route path="*" element={<Navigate to="/" />} />
+      {/* ❌ Fallback */}
+      <Route path="*" element={<Navigate to="/" />} />
 
-      </Routes>
+    </Routes>
   );
 }
 
