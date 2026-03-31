@@ -38,7 +38,7 @@ function Register() {
         } catch (error) {
 
             console.error(error);
-            alert("Registration failed");
+            alert(error.response?.data?.message || "Something went wrong");
 
         }
     };
