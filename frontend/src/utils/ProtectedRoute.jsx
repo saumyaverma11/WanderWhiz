@@ -1,15 +1,39 @@
+// import { useContext } from "react";
+// import { AuthContext } from "../context/AuthContext";
+// import { Navigate } from "react-router-dom";
+
+// function ProtectedRoute({ children }) {
+//   const { auth } = useContext(AuthContext);
+
+//   if (!auth?.user) {
+//     return <Navigate to="/login" />;
+//   }
+
+//   return children;
+// }
+
+// export default ProtectedRoute;
+
+
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
-function ProtectedRoute({ children }) {
-  const { auth } = useContext(AuthContext);
+const ProtectedRoute = ({ children }) => {
+  const { auth, loading } = useContext(AuthContext);
+  const location = useLocation();
 
-  if (!auth?.user) {
-    return <Navigate to="/login" />;
+  // ⏳ Wait until auth is loaded
+  if (loading) {
+    return <div className="text-center mt-10">Checking auth...</div>;
+  }
+
+  // 🔐 If not logged in → redirect
+  if (!auth?.token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return children;
-}
+};
 
 export default ProtectedRoute;

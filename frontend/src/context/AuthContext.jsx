@@ -12,15 +12,38 @@ export const AuthProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(true); // 🔥 IMPORTANT
 
-  useEffect(() => {
-    const stored = localStorage.getItem("auth");
+  // useEffect(() => {
+  //   const stored = localStorage.getItem("auth");
 
-    if (stored) {
-      setAuth(JSON.parse(stored));
+  //   if (stored) {
+  //     setAuth(JSON.parse(stored));
+  //   }
+
+  //   setLoading(false); // 🔥 wait complete
+  // }, []);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("auth");
+
+      if (stored && stored !== "undefined" && stored !== "null") {
+        const parsed = JSON.parse(stored);
+
+        // ✅ Extra safety: check structure
+        if (parsed?.token && parsed?.user) {
+          setAuth(parsed);
+        } else {
+          localStorage.removeItem("auth");
+        }
+      }
+    } catch (error) {
+      console.error("Auth parse error:", error);
+      localStorage.removeItem("auth");
     }
 
-    setLoading(false); // 🔥 wait complete
+    setLoading(false);
   }, []);
+
 
   const login = (data) => {
     setAuth(data);

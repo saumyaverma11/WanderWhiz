@@ -4,10 +4,13 @@ import AuthLayout from "../components/AuthLayout";
 import { loginUser } from "../services/auth.service";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { useLocation } from "react-router-dom";
 
 function Login() {
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/dashboard";
   const { login } = useContext(AuthContext);
 
   const [form, setForm] = useState({
@@ -40,7 +43,7 @@ function Login() {
       if (res.user.role === "admin") {
         navigate("/admin-dashboard");
       } else {
-        navigate("/dashboard");
+        navigate(from);
       }
 
     } catch (error) {
@@ -75,7 +78,7 @@ function Login() {
           required
         />
 
-        
+
 
         <button
           className="w-full bg-orange-500 text-white p-3 rounded-lg hover:bg-orange-600"
