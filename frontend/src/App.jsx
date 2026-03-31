@@ -11,7 +11,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 // Layout
 import DashboardLayout from "./layouts/DashboardLayout";
 import MyTrips from "./pages/MyTrips";
-
+import Profile from "./pages/Profile.jsx";
 // Auth
 import ProtectedRoute from "./utils/ProtectedRoute.jsx";
 
@@ -41,7 +41,7 @@ function App() {
        <Route path="trips" element={<MyTrips />} />
 
         {/* ✅ ADD THIS */}
-        <Route path="profile" element={<div>Profile Page Coming Soon</div>} />
+        <Route path="profile"  element={<Profile />} />
 
 
       </Route>

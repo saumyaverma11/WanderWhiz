@@ -70,6 +70,11 @@ export const login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
+    if (user.isDeleted) {
+      return res.status(403).json({
+        message: "Account deleted",
+      });
+    }
 
     res.json({
       token: generateToken(user),
@@ -144,5 +149,65 @@ export const resetPassword = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: "Error resetting password" });
+  }
+};
+
+// ================= GET PROFILE =================
+export const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching profile" });
+  }
+};
+
+// ================= UPDATE PROFILE =================
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, bio } = req.body;
+
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      user.name = name || user.name;
+      user.bio = bio || user.bio;
+
+      const updatedUser = await user.save();
+      res.json(updatedUser);
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error updating profile" });
+  }
+};
+
+// ================= UPDATE PREFERENCES =================
+export const updatePreferences = async (req, res) => {
+  try {
+    const { budget, travelStyle } = req.body;
+
+    const user = await User.findById(req.user._id);
+
+    user.budget = budget;
+    user.travelStyle = travelStyle;
+
+    const updatedUser = await user.save();
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating preferences" });
+  }
+};
+
+// ================= DELETE ACCOUNT (SOFT) =================
+export const deleteAccount = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    user.isDeleted = true;
+    await user.save();
+
+    res.json({ message: "Account deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting account" });
   }
 };

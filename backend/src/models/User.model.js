@@ -16,6 +16,22 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         },
+        bio: {
+            type: String,
+            default: "",
+        },
+        budget: {
+            type: String,
+            default: "",
+        },
+        travelStyle: {
+            type: String,
+            default: "",
+        },
+        isDeleted: {
+            type: Boolean,
+            default: false,
+        },
 
         verificationToken: String
     },
