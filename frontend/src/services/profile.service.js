@@ -19,3 +19,8 @@ export const deleteAccount = async () => {
   const res = await API.delete("/auth/delete-account");
   return res.data;
 };
+
+export const uploadImage = async (formData) => {
+  const res = await API.post("/auth/upload-image", formData);
+  return res.data;
+};

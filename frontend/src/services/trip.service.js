@@ -17,3 +17,8 @@ export const deleteTrip = async (id) => {
   const res = await API.delete(`/trip/${id}`);
   return res.data;
 };
+
+export const uploadImage = async (formData) => {
+  const res = await API.post("/auth/upload-image", formData);
+  return res.data;
+};

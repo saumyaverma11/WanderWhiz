@@ -1,6 +1,5 @@
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import { FaUserCircle } from "react-icons/fa";
 
 const Navbar = () => {
   const { auth, logout } = useContext(AuthContext);
@@ -9,7 +8,16 @@ const Navbar = () => {
     <div className="bg-white shadow px-6 py-4 flex justify-between items-center">
 
       <div className="flex items-center gap-3">
-        <FaUserCircle className="text-2xl text-orange-500" />
+
+        <img
+          src={
+            auth?.user?.profileImage
+              ? `http://localhost:5000/${auth.user.profileImage}`
+              : "https://via.placeholder.com/40"
+          }
+          className="h-10 w-10 rounded-full object-cover border"
+        />
+
         <h1 className="text-lg font-semibold">
           {auth?.user?.name || "User"}
         </h1>

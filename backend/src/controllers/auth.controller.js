@@ -82,7 +82,10 @@ export const login = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        profileImage: user.profileImage,   // ✅ ADD THIS
+        bio: user.bio,                     // optional
+        createdAt: user.createdAt          // optional
       }
     });
 
@@ -209,5 +212,18 @@ export const deleteAccount = async (req, res) => {
     res.json({ message: "Account deleted" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting account" });
+  }
+};
+
+export const uploadProfileImage = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    user.profileImage = req.file.path;
+    await user.save();
+
+    res.json({ profileImage: user.profileImage });
+  } catch (error) {
+    res.status(500).json({ message: "Upload failed" });
   }
 };

@@ -21,5 +21,7 @@ app.use("/api/weather", weatherRoutes);
 app.use("/api/password", passwordRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/trip", tripRoutes);     
+app.use("/uploads", express.static("uploads"));
+
 
 export default app;
