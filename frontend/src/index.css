@@ -7,3 +7,39 @@ body{
   background-color: white;
   overflow-y: scroll;
 }
+
+@media print {
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* REMOVE buttons/navbar/sidebar */
+  button, nav, .no-print {
+    display: none !important;
+  }
+
+  /* Page styling */
+  body {
+    margin: 0;
+    padding: 20px;
+  }
+
+  /* Avoid breaking cards */
+  .day-card {
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+
+}

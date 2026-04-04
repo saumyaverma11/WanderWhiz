@@ -1,5 +1,7 @@
 import { FaHome, FaMap, FaUser } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext"; // adjust path if needed
 
 const Sidebar = () => {
   const location = useLocation();
@@ -9,6 +11,8 @@ const Sidebar = () => {
       ? "bg-orange-100 text-orange-600"
       : "text-gray-600 hover:bg-gray-100"
     }`;
+  const { auth } = useContext(AuthContext);
+  const user = auth.user;
   return (
     <div className="w-64 bg-white shadow-lg hidden md:flex flex-col">
 
@@ -28,6 +32,11 @@ const Sidebar = () => {
         <Link to="/dashboard/profile" className={linkClass("/dashboard/profile")}>
           <FaUser /> Profile
         </Link>
+        {user?.role === "admin" && (
+          <Link to="/admin" className={linkClass("/dashboard/admin")}>
+            Admin Panel
+          </Link>
+        )}
       </nav>
 
     </div>

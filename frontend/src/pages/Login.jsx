@@ -41,7 +41,7 @@ function Login() {
 
       // ✅ Correct role check
       if (res.user.role === "admin") {
-        navigate("/admin-dashboard");
+        navigate("/dashboard");
       } else {
         navigate(from);
       }

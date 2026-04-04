@@ -24,11 +24,18 @@ router.get(
 // ================= UPDATE USER ROLE =================
 router.put(
   "/users/:id",
-  protect, // ✅ FIXED
+  protect,
   adminMiddleware,
   async (req, res) => {
     try {
       const { role } = req.body;
+
+      // ❗ Prevent self role change
+      if (req.user._id.toString() === req.params.id) {
+        return res.status(400).json({
+          message: "You cannot change your own role",
+        });
+      }
 
       const user = await User.findById(req.params.id);
 

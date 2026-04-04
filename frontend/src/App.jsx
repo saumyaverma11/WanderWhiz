@@ -1,19 +1,30 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-// Pages
+// 🌐 Public Pages
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+
+// 👤 User Pages
 import Dashboard from "./pages/Dashboard";
-import Home from "./pages/Home";
 import TripDetails from "./pages/TripDetails";
-import AdminRoute from "./utils/AdminRoute";
-import AdminDashboard from "./pages/AdminDashboard";
-// Layout
-import DashboardLayout from "./layouts/DashboardLayout";
 import MyTrips from "./pages/MyTrips";
-import Profile from "./pages/Profile.jsx";
-// Auth
-import ProtectedRoute from "./utils/ProtectedRoute.jsx";
+import Profile from "./pages/Profile";
+
+// 🛠 Admin Page
+import AdminLayout from "./layouts/AdminLayout";
+import Users from "./pages/admin/Users";
+import Trips from "./pages/admin/Trips";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+
+
+// 🧩 Layout
+import DashboardLayout from "./layouts/DashboardLayout";
+
+// 🔐 Auth
+import ProtectedRoute from "./utils/ProtectedRoute";
+import AdminRoute from "./utils/AdminRoute";
+
 
 function App() {
   return (
@@ -35,30 +46,34 @@ function App() {
         }
       >
         {/* Nested Routes */}
-        <Route path="" element={<Dashboard />} />
+         <Route index element={<Dashboard />} />
         <Route path="trip/:id" element={<TripDetails />} />
-        {/* ✅ ADD THIS */}
-       <Route path="trips" element={<MyTrips />} />
+        <Route path="trips" element={<MyTrips />} />
+        <Route path="profile" element={<Profile />} />
+        </Route>
 
-        {/* ✅ ADD THIS */}
-        <Route path="profile"  element={<Profile />} />
+<Route
+  path="/admin"
+  element={
+    <AdminRoute>
+      <AdminLayout />
+    </AdminRoute>
+  }
+>
+  <Route index element={<AdminDashboard />} />
+  <Route path="users" element={<Users />} />
+  <Route path="trips" element={<Trips />} />
+</Route>
 
 
-      </Route>
+        
 
-      <Route
-        path="/admin-dashboard"
-        element={
-          <AdminRoute>
-            <AdminDashboard />
-          </AdminRoute>
-        }
-      />
+       
 
       {/* ❌ Fallback */}
       <Route path="*" element={<Navigate to="/" />} />
-
-    </Routes>
+          
+    </Routes >
   );
 }
 
