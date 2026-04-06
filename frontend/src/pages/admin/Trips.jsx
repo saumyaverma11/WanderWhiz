@@ -4,23 +4,45 @@ import { FaMapMarkerAlt, FaTrash, FaEye } from "react-icons/fa";
 
 const Trips = () => {
   const [trips, setTrips] = useState([]);
-  const [selectedTrip, setSelectedTrip] = useState(null); // 🔥 modal
+  const [selectedTrip, setSelectedTrip] = useState(null);
+
+  const [filters, setFilters] = useState({
+    destination: "",
+    user: "",
+    travelType: ""
+  });
 
   useEffect(() => {
     fetchTrips();
   }, []);
 
   const fetchTrips = async () => {
-    const data = await getAllTrips();
-    setTrips(data);
+    try {
+      const data = await getAllTrips();
+      setTrips(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleDelete = async (id) => {
-    await deleteTrip(id);
-    fetchTrips();
+    try {
+      await deleteTrip(id);
+      fetchTrips();
+    } catch (err) {
+      console.error("Delete failed");
+    }
   };
 
-  console.log("Selected Trip:", selectedTrip);
+  // ✅ FILTER LOGIC (FIXED + SAFE)
+  const filteredTrips = trips.filter((trip) => {
+    return (
+      trip.destination.toLowerCase().includes(filters.destination.toLowerCase()) &&
+      (trip.user?.name || "").toLowerCase().includes(filters.user.toLowerCase()) &&
+      (filters.travelType ? trip.travelType === filters.travelType : true)
+    );
+  });
+
   return (
     <div className="p-4 md:p-6">
 
@@ -28,9 +50,58 @@ const Trips = () => {
       <h1 className="text-lg md:text-xl font-semibold text-gray-800 mb-1">
         Trip Management
       </h1>
+
       <p className="text-sm text-gray-400 mb-5">
-        {trips.length} trips across all users
+        {filteredTrips.length} trips found
       </p>
+
+      {/* 🔥 FILTERS */}
+      <div className="flex flex-col md:flex-row gap-3 mb-5">
+
+        <input
+          type="text"
+          placeholder="Destination..."
+          value={filters.destination}
+          onChange={(e) =>
+            setFilters({ ...filters, destination: e.target.value })
+          }
+          className="border px-3 py-2 rounded-lg text-sm w-full md:w-1/4"
+        />
+
+        <input
+          type="text"
+          placeholder="User..."
+          value={filters.user}
+          onChange={(e) =>
+            setFilters({ ...filters, user: e.target.value })
+          }
+          className="border px-3 py-2 rounded-lg text-sm w-full md:w-1/4"
+        />
+
+        <select
+          value={filters.travelType}
+          onChange={(e) =>
+            setFilters({ ...filters, travelType: e.target.value })
+          }
+          className="border px-3 py-2 rounded-lg text-sm w-full md:w-1/5"
+        >
+          <option value="">All Types</option>
+          <option value="solo">Solo</option>
+          <option value="family">Family</option>
+          <option value="couple">Couple</option>
+          <option value="friends">Friends</option>
+        </select>
+
+        <button
+          onClick={() =>
+            setFilters({ destination: "", user: "", travelType: "" })
+          }
+          className="bg-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gray-300"
+        >
+          Clear
+        </button>
+
+      </div>
 
       {/* 🔥 TABLE */}
       <div className="bg-white rounded-2xl shadow overflow-x-auto">
@@ -49,7 +120,7 @@ const Trips = () => {
           </thead>
 
           <tbody>
-            {trips.map((trip) => (
+            {filteredTrips.map((trip) => (
               <tr key={trip._id} className="border-t hover:bg-gray-50 transition">
 
                 {/* DESTINATION */}
@@ -74,7 +145,7 @@ const Trips = () => {
 
                 {/* TYPE */}
                 <td className="px-5 py-4">
-                  <span className="px-3 py-1 text-xs rounded-full bg-orange-100 text-orange-600">
+                  <span className="px-3 py-1 text-xs rounded-full bg-orange-100 text-orange-600 capitalize">
                     {trip.travelType}
                   </span>
                 </td>
@@ -87,7 +158,6 @@ const Trips = () => {
                 {/* ACTIONS */}
                 <td className="px-5 py-4 text-right space-x-3">
 
-                  {/* VIEW */}
                   <button
                     onClick={() => setSelectedTrip(trip)}
                     className="text-blue-500 hover:text-blue-600 text-sm inline-flex items-center gap-1"
@@ -95,7 +165,6 @@ const Trips = () => {
                     <FaEye size={12} /> View
                   </button>
 
-                  {/* DELETE */}
                   <button
                     onClick={() => handleDelete(trip._id)}
                     className="text-red-500 hover:text-red-600 text-sm inline-flex items-center gap-1"
@@ -109,10 +178,6 @@ const Trips = () => {
             ))}
           </tbody>
         </table>
-
-
-
-
       </div>
 
       {/* 🔥 MODAL */}
@@ -121,9 +186,9 @@ const Trips = () => {
 
           <div className="bg-white w-[95%] md:w-[70%] max-h-[80vh] rounded-2xl shadow-xl overflow-hidden">
 
-            {/* Header */}
+            {/* HEADER */}
             <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-base md:text-lg font-semibold text-gray-800 tracking-wide">
+              <h2 className="text-base md:text-lg font-semibold text-gray-800">
                 {selectedTrip.destination} Itinerary
               </h2>
 
@@ -135,55 +200,31 @@ const Trips = () => {
               </button>
             </div>
 
-            {/* Content */}
+            {/* CONTENT */}
             <div className="p-4 overflow-y-auto max-h-[70vh]">
 
-              <p className="text-xs md:text-sm text-gray-400 mb-1">
+              <p className="text-xs text-gray-400 mb-1">
                 by {selectedTrip.user?.name}
               </p>
 
-              <p className="text-xs md:text-sm text-gray-400 mb-4">
+              <p className="text-xs text-gray-400 mb-4">
                 {selectedTrip.startDate?.slice(0, 10)} → {selectedTrip.endDate?.slice(0, 10)}
               </p>
 
-              {/* 🔥 ITINERARY */}
               <div className="space-y-4">
 
-                {selectedTrip.itinerary && selectedTrip.itinerary.length > 0 ? (
+                {selectedTrip.itinerary?.length > 0 ? (
                   selectedTrip.itinerary.map((day, index) => (
-
                     <div key={index} className="border rounded-xl p-4 bg-gray-50">
 
-                      <h3 className="text-sm font-semibold text-orange-500 tracking-wide mb-2">
+                      <h3 className="text-sm font-semibold text-orange-500 mb-2">
                         Day {day.day} ({day.date})
                       </h3>
 
-                      <p className="text-sm text-gray-700 leading-relaxed">
-                        🌅 <b>Morning:</b> {day.morning}
-                      </p>
+                      <p className="text-sm">🌅 {day.morning}</p>
+                      <p className="text-sm">☀️ {day.afternoon}</p>
+                      <p className="text-sm">🌙 {day.evening}</p>
 
-                      <p className="text-sm text-gray-700 leading-relaxed">
-                        ☀️ <b>Afternoon:</b> {day.afternoon}
-                      </p>
-
-                      <p className="text-sm text-gray-700 leading-relaxed">
-                        🌙 <b>Evening:</b> {day.evening}
-                      </p>
-
-                      {/* Places */}
-                      {day.places?.length > 0 && (
-                        <div className="mt-3">
-                          <p className="text-xs text-gray-500 mb-1">Places:</p>
-
-                          {day.places.map((place, i) => (
-                            <div key={i} className="text-sm text-gray-700 bg-white p-3 rounded-lg shadow-sm mb-1">
-                              <b>{place.name}</b> — {place.description}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Weather */}
                       {day.weather && (
                         <p className="text-xs text-gray-400 mt-2">
                           🌤 {day.weather.temperature}°C | {day.weather.condition}
@@ -191,7 +232,6 @@ const Trips = () => {
                       )}
 
                     </div>
-
                   ))
                 ) : (
                   <p className="text-gray-400 text-center">
@@ -200,11 +240,8 @@ const Trips = () => {
                 )}
 
               </div>
-
             </div>
-
           </div>
-
         </div>
       )}
 
