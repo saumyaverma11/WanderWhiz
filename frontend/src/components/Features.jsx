@@ -1,51 +1,103 @@
+import { Sparkles, CloudSun, MapPin, Zap, Globe, Shield } from "lucide-react";
+
 function Features() {
-  const features = [
-    {
-      title: "AI Travel Planning",
-      desc: "Generate smart itineraries instantly with AI assistance.",
-    },
-    {
-      title: "Weather Insights",
-      desc: "Check real-time weather for every destination.",
-    },
-    {
-      title: "Location Explorer",
-      desc: "Discover nearby attractions, hotels and restaurants.",
-    },
-    {
-      title: "Trip Dashboard",
-      desc: "Save and manage all your trips in one place.",
-    },
-  ];
-
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-gray-50 px-6">
 
-      <div className="max-w-7xl mx-auto px-6">
+      {/* Top Text */}
+      <div className="text-center max-w-3xl mx-auto">
 
-        <h2 className="text-3xl font-bold text-center mb-12">
-          Why Choose WanderWhiz
+        <p className="text-orange-500 font-semibold tracking-widest uppercase text-sm">
+          WHY WANDERWHIZ
+        </p>
+
+        <h2 className="text-4xl md:text-5xl font-extrabold mt-3 text-gray-900 leading-tight">
+          Everything you need to <br /> travel smarter
         </h2>
 
-        <div className="grid md:grid-cols-4 gap-8">
+        <p className="mt-4 text-gray-500 text-lg">
+          No more hours of research. Our AI handles the planning so you can focus on the experience.
+        </p>
 
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition"
-            >
+      </div>
 
-              <h3 className="text-xl font-semibold mb-3">
-                {feature.title}
-              </h3>
+      {/* Cards */}
+      <div className="grid md:grid-cols-3 gap-8 mt-14">
 
-              <p className="text-gray-600">
-                {feature.desc}
-              </p>
+        {/* CARD */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition">
 
-            </div>
-          ))}
+          <div className="bg-orange-100 p-3 w-fit rounded-xl mb-4">
+            <Sparkles className="text-orange-500" />
+          </div>
 
+          <h3 className="font-semibold text-lg">AI Itinerary Generation</h3>
+
+          <p className="text-gray-500 mt-2">
+            Groq-powered LLM crafts a personalized day-by-day travel plan in seconds.
+          </p>
+        </div>
+
+        {/* CARD */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition">
+
+          <div className="bg-blue-100 p-3 w-fit rounded-xl mb-4">
+            <CloudSun className="text-blue-500" />
+          </div>
+
+          <h3 className="font-semibold text-lg">Live Weather</h3>
+
+          <p className="text-gray-500 mt-2">
+            Real-time weather data for your destination so you always pack right.
+          </p>
+        </div>
+
+        {/* CARD */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition">
+
+          <div className="bg-green-100 p-3 w-fit rounded-xl mb-4">
+            <MapPin className="text-green-500" />
+          </div>
+
+          <h3 className="font-semibold text-lg">Nearby Places</h3>
+
+          <p className="text-gray-500 mt-2">
+            Discover top attractions, restaurants, and hotels via OpenStreetMap.
+          </p>
+        </div>
+
+        {/* ROW 2 */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition">
+          <div className="bg-purple-100 p-3 w-fit rounded-xl mb-4">
+            <Zap className="text-purple-500" />
+          </div>
+
+          <h3 className="font-semibold text-lg">Instant Planning</h3>
+          <p className="text-gray-500 mt-2">
+            From idea to full itinerary in under 10 seconds.
+          </p>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition">
+          <div className="bg-teal-100 p-3 w-fit rounded-xl mb-4">
+            <Globe className="text-teal-500" />
+          </div>
+
+          <h3 className="font-semibold text-lg">Any Destination</h3>
+          <p className="text-gray-500 mt-2">
+            Works for any city or country in the world.
+          </p>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition">
+          <div className="bg-red-100 p-3 w-fit rounded-xl mb-4">
+            <Shield className="text-red-500" />
+          </div>
+
+          <h3 className="font-semibold text-lg">Secure & Private</h3>
+          <p className="text-gray-500 mt-2">
+            JWT authentication keeps your trips safe.
+          </p>
         </div>
 
       </div>

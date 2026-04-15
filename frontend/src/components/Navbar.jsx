@@ -1,25 +1,36 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
 import logoIcon from "../assets/logos/logo-icon.png";
 import logoText from "../assets/logos/logo-text.png";
 
 function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 80);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <nav className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
+    <nav
+      className={`fixed w-full z-50 transition-all duration-300 
+      ${scrolled ? "bg-white shadow-md py-3" : "bg-transparent py-5"}`}
+    >
+      <div className="flex justify-between items-center px-10">
 
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
-
-        {/* Logo Section */}
+        {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
 
-          {/* Icon Logo */}
           <img
             src={logoIcon}
             alt="logo icon"
-            className="h-15 w-12 object-contain"
+            className="h-12 w-12 object-contain"
           />
 
-          {/* Text Logo */}
           <img
             src={logoText}
             alt="WanderWhiz"
@@ -28,37 +39,31 @@ function Navbar() {
 
         </Link>
 
-        {/* Navigation */}
-        <div className="flex items-center gap-8 font-medium text-gray-700">
-
-          <Link
-            to="/"
-            className="hover:text-orange-500 transition"
-          >
-            Home
-          </Link>
-
-          <Link
-            to="/create-trip"
-            className="hover:text-orange-500 transition"
-          >
-            Plan Trip
-          </Link>
-
-          <Link
-            to="/login"
-            className="bg-orange-500 text-white px-5 py-2 rounded-lg hover:bg-orange-600 transition"
-          >
-            Login
-          </Link>
-
+        {/* Links */}
+        <div className="space-x-6 hidden md:flex">
+          {["Home", "About", "Gallery", "FAQ", "Contact"].map((item) => (
+            <Link
+              key={item}
+              to={`/${item.toLowerCase()}`}
+              className={`font-medium hover:text-orange-500 transition 
+              ${scrolled ? "text-black" : "text-white"}`}
+            >
+              {item}
+            </Link>
+          ))}
         </div>
 
-      </div>
+        {/* Button */}
+        <Link
+          to="/login"
+          className="bg-orange-500 text-white px-5 py-2 rounded-full hover:bg-orange-600"
+        >
+          Login
+        </Link>
 
+      </div>
     </nav>
   );
 }
 
 export default Navbar;
-

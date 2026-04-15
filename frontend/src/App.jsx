@@ -25,6 +25,9 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import AdminRoute from "./utils/AdminRoute";
 
+import About from "./pages/About";
+import Gallery from "./pages/Gallery";
+import FAQ from "./pages/FAQ";
 
 function App() {
   return (
@@ -35,6 +38,9 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/gallery" element={<Gallery />} />
+      <Route path="/faq" element={<FAQ />} />
 
       {/* 🔒 Dashboard Layout */}
       <Route
@@ -46,33 +52,33 @@ function App() {
         }
       >
         {/* Nested Routes */}
-         <Route index element={<Dashboard />} />
+        <Route index element={<Dashboard />} />
         <Route path="trip/:id" element={<TripDetails />} />
         <Route path="trips" element={<MyTrips />} />
         <Route path="profile" element={<Profile />} />
-        </Route>
+      </Route>
 
-<Route
-  path="/admin"
-  element={
-    <AdminRoute>
-      <AdminLayout />
-    </AdminRoute>
-  }
->
-  <Route index element={<AdminDashboard />} />
-  <Route path="users" element={<Users />} />
-  <Route path="trips" element={<Trips />} />
-</Route>
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminLayout />
+          </AdminRoute>
+        }
+      >
+        <Route index element={<AdminDashboard />} />
+        <Route path="users" element={<Users />} />
+        <Route path="trips" element={<Trips />} />
+      </Route>
 
 
-        
 
-       
+
+
 
       {/* ❌ Fallback */}
       <Route path="*" element={<Navigate to="/" />} />
-          
+
     </Routes >
   );
 }
