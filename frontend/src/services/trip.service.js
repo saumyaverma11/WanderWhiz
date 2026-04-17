@@ -2,23 +2,18 @@ import API from "./api";
 
 // ✅ CREATE TRIP
 export const createTrip = async (data) => {
-  const res = await API.post("/trip", data);
+  const res = await API.post("/api/trip", data);
   return res.data;
 };
 
 // ✅ GET ALL USER TRIPS
 export const getTrips = async () => {
-  const res = await API.get("/trip");
+  const res = await API.get("/api/trip");
   return res.data;
 };
 
-
+// ✅ DELETE TRIP
 export const deleteTrip = async (id) => {
-  const res = await API.delete(`/trip/${id}`);
-  return res.data;
-};
-
-export const uploadImage = async (formData) => {
-  const res = await API.post("/auth/upload-image", formData);
+  const res = await API.delete(`/api/trip/${id}`);
   return res.data;
 };

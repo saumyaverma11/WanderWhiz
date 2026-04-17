@@ -1,9 +1,9 @@
 import API from "./api";
 
-// 🚀 FRONTEND → CALL BACKEND API
+// 🚀 GENERATE AI TRIP
 export const generateAITrip = async (tripId) => {
   try {
-    const res = await API.get(`/ai/${tripId}`);
+    const res = await API.get(`/api/ai/${tripId}`); // ✅ FIXED
     return res.data;
   } catch (error) {
     console.error("AI Trip Error:", error);
