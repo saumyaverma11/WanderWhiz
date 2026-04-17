@@ -129,7 +129,9 @@ const Navbar = ({ openSidebar }) => {
             </button>
 
             <button
-              onClick={logout}
+              onClick={() => {
+                logout();
+              }}
               className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
             >
               Logout

@@ -12,16 +12,7 @@ export const AuthProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(true); // 🔥 IMPORTANT
 
-  // useEffect(() => {
-  //   const stored = localStorage.getItem("auth");
-
-  //   if (stored) {
-  //     setAuth(JSON.parse(stored));
-  //   }
-
-  //   setLoading(false); // 🔥 wait complete
-  // }, []);
-
+  
   useEffect(() => {
     try {
       const stored = localStorage.getItem("auth");

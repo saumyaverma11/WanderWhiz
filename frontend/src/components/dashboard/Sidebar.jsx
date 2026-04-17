@@ -1,7 +1,8 @@
-import { FaHome, FaMap, FaUser } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import { FaHome, FaMap, FaUser, FaImages, FaQuestionCircle, FaEnvelope } from "react-icons/fa";
+
 
 const Sidebar = ({ closeSidebar }) => {
   const location = useLocation();
@@ -29,6 +30,17 @@ const Sidebar = ({ closeSidebar }) => {
 
         <Link to="/dashboard/profile" onClick={closeSidebar} className={linkClass("/dashboard/profile")}>
           <FaUser /> Profile
+        </Link>
+        <Link to="/dashboard/gallery" onClick={closeSidebar} className={linkClass("/dashboard/gallery")}>
+          <FaImages /> Gallery
+        </Link>
+
+        <Link to="/dashboard/faq" onClick={closeSidebar} className={linkClass("/dashboard/faq")}>
+          <FaQuestionCircle /> FAQ
+        </Link>
+
+        <Link to="/dashboard/contact" onClick={closeSidebar} className={linkClass("/dashboard/contact")}>
+          <FaEnvelope /> Contact
         </Link>
         {user?.role === "admin" && (
           <Link to="/admin" onClick={closeSidebar} className={linkClass("/dashboard/admin")}>

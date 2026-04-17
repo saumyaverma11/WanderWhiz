@@ -1,4 +1,10 @@
+import { useNavigate } from "react-router-dom";
+import { FaTimes } from "react-icons/fa";
+
 function AuthLayout({ children, title, subtitle }) {
+
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen grid grid-cols-1 md:grid-cols-2">
 
@@ -40,14 +46,25 @@ function AuthLayout({ children, title, subtitle }) {
         {/* FORM CARD */}
         <div className="relative z-10 bg-white/95 backdrop-blur-md shadow-xl rounded-2xl p-8 w-full max-w-md">
 
+          {/* ❌ CLOSE BUTTON */}
+          <button
+            onClick={() => navigate("/")}
+            className="absolute top-4 right-4 text-gray-400 hover:text-black transition"
+          >
+            <FaTimes size={18} />
+          </button>
+
+          {/* TITLE */}
           <h2 className="text-2xl font-bold text-center text-[#0f172a]">
             {title}
           </h2>
 
+          {/* SUBTITLE */}
           <p className="text-gray-500 text-center mt-2">
             {subtitle}
           </p>
 
+          {/* FORM */}
           <div className="mt-6">
             {children}
           </div>
