@@ -10,7 +10,13 @@ import tripRoutes from "./routes/trip.routes.js";
 
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173", // local frontend
+    "https://wander-whiz-ten.vercel.app" // your deployed frontend
+  ],
+  credentials: true
+}));
 
 app.use(express.json());  // used for extracting request body
 
