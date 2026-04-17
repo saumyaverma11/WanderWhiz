@@ -1,11 +1,12 @@
 import Navbar from "../components/Navbar";
-import Hero from "../components/Hero";
-import Stats from "../components/Stats";
-import Features from "../components/Features";
-import Destinations from "../components/Destinations";
-import Testimonials from "../components/Testimonals";
-import CTA from "../components/CTA";
-import Footer from "../components/Footer";
+import Hero from "../components/homePage/Hero";
+import Features from "../components/homePage/Features";
+import Stats from "../components/homePage/Stats";
+import Destinations from "../components/homePage/Destinations";
+import Testimonials from "../components/homePage/Testimonals"; // fixed
+import CTA from "../components/homePage/CTA";
+import Footer from "../components/Footer"; // fixed
+
 
 function Home() {
   return (

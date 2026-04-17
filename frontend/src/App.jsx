@@ -28,6 +28,7 @@ import AdminRoute from "./utils/AdminRoute";
 import About from "./pages/About";
 import Gallery from "./pages/Gallery";
 import FAQ from "./pages/FAQ";
+import Contact from "./pages/Contact";
 
 function App() {
   return (
@@ -41,7 +42,7 @@ function App() {
       <Route path="/about" element={<About />} />
       <Route path="/gallery" element={<Gallery />} />
       <Route path="/faq" element={<FAQ />} />
-
+      <Route path="/contact" element={<Contact />} />
       {/* 🔒 Dashboard Layout */}
       <Route
         path="/dashboard"

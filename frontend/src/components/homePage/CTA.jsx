@@ -31,7 +31,7 @@ function CTA() {
           </a>
 
           <a
-            href="/faq"
+            href="/about"
             className="border border-white px-6 py-3 rounded-full"
           >
             Learn More

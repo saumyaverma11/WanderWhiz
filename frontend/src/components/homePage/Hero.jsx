@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom";
+
 function Hero() {
+  const navigate = useNavigate();
   return (
     <section className="h-screen relative">
 
@@ -33,11 +36,18 @@ function Hero() {
         </p>
 
         <div className="mt-6 flex gap-4">
-          <button className="bg-orange-500 px-6 py-3 rounded-full hover:bg-orange-600">
+          <button
+            onClick={() => navigate("/login")}
+            className="bg-orange-500 px-6 py-3 rounded-full hover:bg-orange-600 transition"
+          >
             Start Planning Free →
           </button>
 
-          <button className="border px-6 py-3 rounded-full hover:bg-white hover:text-black">
+          {/* About */}
+          <button
+            onClick={() => navigate("/about")}
+            className="border px-6 py-3 rounded-full hover:bg-white hover:text-black transition"
+          >
             ▶ See How It Works
           </button>
         </div>
